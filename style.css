@@ -66,6 +66,7 @@ canvas{background:linear-gradient(180deg,#04101a,#081827);display:block;border-r
 /* PC・タブレット（標準） */
 body {
   font-size: 16px;
+  background: #0B1437;  /* 濃紺 */
 }
 
 /* スマホだけフォント大きめ */
@@ -74,3 +75,12 @@ body {
     font-size: 4vw;
   }
 }
+#paddleArea {
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  height: 40vh;       /* ←ここが指で操作するゾーン */
+  background: transparent;
+  z-index: 10;        /* 棒より上でOK、透明だから邪魔にならない */
+}
+
