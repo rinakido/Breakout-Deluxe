@@ -63,3 +63,14 @@ canvas{background:linear-gradient(180deg,#04101a,#081827);display:block;border-r
 .heart.pop {
   animation: pop 0.3s ease forwards;
 }
+/* PC・タブレット（標準） */
+body {
+  font-size: 16px;
+}
+
+/* スマホだけフォント大きめ */
+@media (max-width: 600px) {
+  body {
+    font-size: 4vw;
+  }
+}
