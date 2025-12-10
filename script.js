@@ -35,10 +35,10 @@ let mouseX = null;
 let useMouse = true;
 
 // ブロック
-let brickRowCount = 4;
+let brickRowCount = 6;
 let brickColumnCount = 8;
 let brickWidth = 60;
-let brickHeight = 20;
+let brickHeight = 16;
 let brickPadding = 8;
 let brickOffsetTop = 60;
 let brickOffsetLeft = 30;
@@ -51,7 +51,7 @@ let particles = [];
 // 音（安全に読み込み）
 let soundHit = null, soundBlock = null, soundOver = null;
 try {
-    soundHit = new Audio("hit.mp3");
+    soundHit = new Audio("https://assets.mixkit.co/active_storage/sfx/2073/2073.wav");
     soundBlock = new Audio("block.mp3");
     soundOver = new Audio("over.mp3");
 } catch (e) { /* ignore if not available */ }
@@ -102,7 +102,6 @@ function spawnParticles(cx, cy, color){
     }
 }
 // === アイテムドロップ ===
-// === アイテムを落とす ===
 function dropItemAt(x, y){
     // 20% の確率で落とす
     if (Math.random() < 0.20){
@@ -224,6 +223,18 @@ function updateParticles(){
         if (p.life <= 0) particles.splice(i,1);
     }
 }
+ctx.fillStyle = "#0B1437";
+ctx.fillRect(0, 0, W, H);
+
+// === Coldplay ネオンレインボー ===
+const coldplayColors = [
+    "#FF5A36", // ネオン赤・オレンジ
+    "#FF8A00", // オレンジ
+    "#FFD300", // イエロー
+    "#33CC5E", // グリーン
+    "#1E90FF", // ブルー
+    "#7A2ED6"  // パープル
+];
 
 // === 描画パーツ ===
 function drawBricks(){
@@ -233,16 +244,19 @@ function drawBricks(){
             const bx = c*(brickWidth+brickPadding) + brickOffsetLeft;
             const by = r*(brickHeight+brickPadding) + brickOffsetTop;
             if (!b || b.status === 0) continue;
-            // color by hits
-            if (b.hits >= 2) ctx.fillStyle = "#FFB773"; // orange (hard)
-            else ctx.fillStyle = "#99FF66"; // light green
+
+            // ★ 行番号で色決め（Coldplayカラー）
+            ctx.fillStyle = coldplayColors[r % coldplayColors.length];
+
             roundRect(ctx, bx, by, brickWidth, brickHeight, 6, true);
+
             // border
             ctx.strokeStyle = "rgba(0,0,0,0.2)";
             ctx.strokeRect(bx, by, brickWidth, brickHeight);
         }
     }
 }
+
 
 function drawBall(){
     ctx.beginPath();
@@ -444,7 +458,18 @@ function startGame(){
     }
 }
 
-// kick off
+/// ===== ゲーム開始 =====
 startGame();
+
+// ===== パドル操作（マウス） =====
+document.addEventListener("mousemove", (e) => {
+    const rect = canvas.getBoundingClientRect();
+    const mouseX = e.clientX - rect.left;
+
+    paddleX = clamp(mouseX - paddleWidth / 2, 0, W - paddleWidth);
+});
+
+
+
 
 
