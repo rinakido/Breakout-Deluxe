@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8" />
+    <title>ブロック崩し</title>
+    <link rel="stylesheet" href="style.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+</head>
+<body onload="document.getElementById('gameCanvas').focus()">
+    <div class="container">
+        <canvas id="gameCanvas" width="640" height="480" tabindex="0"></canvas>
+        <div id="lives"></div>
+        <div id="ui">
+            <p id="startText"></p>
+            <div id="hud">
+                <div id="score" class="hud">Score: 0</div>
+                <div id="level" class="hud">Level: 1</div>
+                <div id="combo" class="hud">Combo: 0</div>
+                
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
