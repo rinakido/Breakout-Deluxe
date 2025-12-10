@@ -368,6 +368,17 @@ canvas.addEventListener("mousemove", (e)=>{
     paddleX = clamp(xPos - paddleWidth/2, 0, W - paddleWidth);
     useMouse = true;
 });
+// === スマホ対応: タッチでパドルを動かす ===
+canvas.addEventListener("touchmove", (e) => {
+    e.preventDefault(); // スクロール防止
+
+    const rect = canvas.getBoundingClientRect();
+    const touch = e.touches[0];
+    const xPos = touch.clientX - rect.left;
+
+    paddleX = clamp(xPos - paddleWidth / 2, 0, W - paddleWidth);
+    useMouse = true;
+}, { passive: false });
 
 // start on click (overlay)
 document.addEventListener("click", (e)=>{
@@ -435,4 +446,5 @@ function startGame(){
 
 // kick off
 startGame();
+
 
