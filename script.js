@@ -31,8 +31,8 @@ const PADDLE_Y_PAD = 20;
 // 入力
 let rightPressed = false;
 let leftPressed = false;
-let mouseX = null;
-let useMouse = true; // ← このフラグはもう使用されませんが、定義は残します
+// let mouseX = null; // 不要な変数を削除
+// let useMouse = true; // 不要な変数を削除
 
 // ブロック
 let brickRowCount = 7;
@@ -52,8 +52,8 @@ let particles = [];
 let soundHit = null, soundBlock = null, soundOver = null;
 try {
     soundHit = new Audio("https://assets.mixkit.co/active_storage/sfx/2073/2073.wav");
-    soundBlock = new Audio("block.mp3");
-    soundOver = new Audio("over.mp3");
+    // soundBlock = new Audio("block.mp3"); // ローカルファイルをコメントアウト
+    // soundOver = new Audio("over.mp3"); // ローカルファイルをコメントアウト
 } catch (e) { /* ignore if not available */ }
 
 // ---- Helper ----
@@ -375,25 +375,30 @@ document.addEventListener("keyup", (e)=>{
     if (k === "arrowleft" || k === "a") leftPressed = false;
 });
 
-// mouse movement to control paddle (optional)
+// ********** 【ここから修正された入力処理】 **********
+
+// 共通のパドル位置計算ロジック
+function handlePointerMove(clientX){
+    const rect = canvas.getBoundingClientRect();
+    const xPos = clientX - rect.left;
+    // パドルをポインターの中心に移動し、キャンバス内にクランプ
+    paddleX = clamp(xPos - paddleWidth/2, 0, W - paddleWidth);
+}
+
+// マウスでの操作
 canvas.addEventListener("mousemove", (e)=>{
-    const rect = canvas.getBoundingClientRect();
-    const xPos = e.clientX - rect.left;
-    // center paddle on pointer
-    paddleX = clamp(xPos - paddleWidth/2, 0, W - paddleWidth);
-    // useMouse = true; ← 削除
+    handlePointerMove(e.clientX);
 });
-// === スマホ対応: タッチでパドルを動かす ===
+
+// スマホ対応: タッチでの操作
 canvas.addEventListener("touchmove", (e) => {
     e.preventDefault(); // スクロール防止
 
-    const rect = canvas.getBoundingClientRect();
     const touch = e.touches[0];
-    const xPos = touch.clientX - rect.left;
-
-    paddleX = clamp(xPos - paddleWidth / 2, 0, W - paddleWidth);
-    // useMouse = true; ← 削除
+    handlePointerMove(touch.clientX);
 }, { passive: false });
+
+// ********** 【ここまで修正された入力処理】 **********
 
 // start on click (overlay)
 document.addEventListener("click", (e)=>{
@@ -436,8 +441,7 @@ function loop(){
     checkCollisionsAndProgress();
     checkLevelClear();
 
-    // movement for paddle by keys (if user moved mouse recently, prefer mouse)
-    // 修正済み: if (!useMouse) を削除し、常にキーボード入力をチェック
+    // movement for paddle by keys (キーボード入力)
     if (rightPressed) paddleX = clamp(paddleX + 6, 0, W - paddleWidth);
     if (leftPressed) paddleX = clamp(paddleX - 6, 0, W - paddleWidth);
 
@@ -460,12 +464,3 @@ function startGame(){
 
 /// ===== ゲーム開始 =====
 startGame();
-
-// ===== パドル操作（マウス） =====
-// 復活させたコード (マウスの追従性を高めるため)
-document.addEventListener("mousemove", (e) => {
-    const rect = canvas.getBoundingClientRect();
-    const mouseX = e.clientX - rect.left;
-
-    paddleX = clamp(mouseX - paddleWidth / 2, 0, W - paddleWidth);
-});
