@@ -2,23 +2,16 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>ブロック崩し</title>
-    <link rel="stylesheet" href="style.css" />
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
 </head>
 
-<body onload="document.getElementById('gameCanvas').focus()">
-
-    <!-- ゲームを完全中央に配置 -->
+<body>
     <div class="container">
-
-        <!-- キャンバス本体 -->
-        <canvas id="gameCanvas" width="640" height="480" tabindex="0"></canvas>
-
-        <!-- ライフ表示 -->
+        <canvas id="gameCanvas" tabindex="0"></canvas>
         <div id="lives"></div>
-
-        <!-- UI -->
         <div id="ui">
             <p id="startText"></p>
             <div id="hud">
@@ -27,14 +20,8 @@
                 <div id="combo" class="hud">Combo: 0</div>
             </div>
         </div>
-
     </div>
 
-    <!-- ★ これがスマホ操作エリア（ここでOK） -->
-    <div id="paddleArea"></div>
-
-    <!-- ★ script.js は1回だけでOK -->
     <script src="script.js"></script>
-
 </body>
 </html>

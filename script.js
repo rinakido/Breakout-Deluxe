@@ -1,37 +1,33 @@
-// ===== ブロック崩しゲーム 完全版 =====
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 
-let W = window.innerWidth;
-let H = window.innerHeight * 0.6;
+const MAX_WIDTH = 800;
+const ASPECT_RATIO = 0.75;
+let W = Math.min(window.innerWidth, MAX_WIDTH);
+let H = W * ASPECT_RATIO;
 canvas.width = W;
 canvas.height = H;
 
-// === ゲーム変数 ===
 let gameStarted = false;
 let level = 1;
 let score = 0;
 let combo = 0;
 let comboTimer = null;
-let fever = false;
+let lives = 3;
 
-// ボール
 let x = W/2, y = H-60;
 let dx = 3, dy = -3;
 const ballRadius = 8;
 
-// パドル
 let paddleWidth = 100;
 const paddleHeight = 12;
 let paddleX = (W - paddleWidth)/2;
 const PADDLE_Y_PAD = 20;
 
-// 入力
 let rightPressed = false;
 let leftPressed = false;
-let useMouse = false;
+let mouseX = null;
 
-// ブロック
 let brickRowCount = 6;
 let brickColumnCount = 8;
 let brickWidth = 60;
@@ -41,25 +37,22 @@ let brickOffsetTop = 60;
 let brickOffsetLeft = 30;
 let bricks = [];
 
-// アイテム＆パーティクル
 let items = [];
 let particles = [];
 
-// 音
-let soundHit = null, soundBlock = null, soundOver = null;
+let soundHit = null;
 try {
     soundHit = new Audio("https://assets.mixkit.co/active_storage/sfx/2073/2073.wav");
-    soundBlock = new Audio("block.mp3");
-    soundOver = new Audio("over.mp3");
 } catch(e){}
 
-// ---- Helper ----
 function clamp(v,a,b){ return Math.max(a, Math.min(b,v)); }
 function rand(min,max){ return Math.random()*(max-min)+min; }
 
-// === 初期化ブロック ===
 function initBricks(){
     bricks = [];
+    const bw = (W - brickOffsetLeft*2 - brickPadding*(brickColumnCount-1)) / brickColumnCount;
+    brickWidth = bw;
+    
     for(let c=0;c<brickColumnCount;c++){
         bricks[c]=[];
         for(let r=0;r<brickRowCount;r++){
@@ -70,17 +63,28 @@ function initBricks(){
 }
 initBricks();
 
-// === UI更新 ===
 const scoreEl = document.getElementById("score");
 const levelEl = document.getElementById("level");
 const comboEl = document.getElementById("combo");
+const livesEl = document.getElementById("lives");
+
 function updateHUD(){
     scoreEl.textContent = `Score: ${score}`;
     levelEl.textContent = `Level: ${level}`;
     comboEl.textContent = `Combo: ${combo}`;
 }
 
-// === パーティクル ===
+function updateLives(){
+    livesEl.innerHTML = '';
+    for(let i = 0; i < lives; i++){
+        const heart = document.createElement('div');
+        heart.className = 'heart';
+        livesEl.appendChild(heart);
+    }
+}
+
+updateLives();
+
 function spawnParticles(cx, cy, color){
     for(let i=0;i<12;i++){
         particles.push({
@@ -94,7 +98,6 @@ function spawnParticles(cx, cy, color){
     }
 }
 
-// === アイテムドロップ ===
 function dropItemAt(x,y){
     if(Math.random()<0.2){
         const t = Math.floor(Math.random()*3);
@@ -102,7 +105,6 @@ function dropItemAt(x,y){
     }
 }
 
-// === コンボ処理 ===
 function addCombo(){
     combo++;
     clearTimeout(comboTimer);
@@ -111,7 +113,6 @@ function addCombo(){
     updateHUD();
 }
 
-// === 当たり判定（ボールとブロック） ===
 function collisionDetection(){
     for(let c=0;c<brickColumnCount;c++){
         for(let r=0;r<brickRowCount;r++){
@@ -124,7 +125,7 @@ function collisionDetection(){
                     dy = -dy;
                     b.hits--;
                     spawnParticles(x,y,"#dfffa0");
-                    if(soundBlock){ try{soundBlock.currentTime=0; soundBlock.play(); }catch{} }
+                    if(soundHit){ try{soundHit.currentTime=0; soundHit.play(); }catch{} }
                     if(b.hits<=0){
                         b.status=0;
                         addCombo();
@@ -139,7 +140,6 @@ function collisionDetection(){
     }
 }
 
-// === アイテム更新 ===
 function updateItems(){
     for(let i=items.length-1;i>=0;i--){
         const it = items[i];
@@ -151,9 +151,6 @@ function updateItems(){
             } else if(it.type===1){
                 dx*=0.8; dy*=0.8;
                 setTimeout(()=>{ dx*=1.25; dy*=1.25; },8000);
-            } else if(it.type===2){
-                fever=true;
-                setTimeout(()=>{ fever=false; },8000);
             }
             items.splice(i,1);
             continue;
@@ -162,7 +159,6 @@ function updateItems(){
     }
 }
 
-// === パーティクル更新 ===
 function updateParticles(){
     for(let i=particles.length-1;i>=0;i--){
         const p = particles[i];
@@ -174,7 +170,6 @@ function updateParticles(){
     }
 }
 
-// === 描画 ===
 const coldplayColors = ["#FF5A36","#FF8A00","#FFD300","#33CC5E","#1E90FF","#7A2ED6"];
 
 function drawBricks(){
@@ -185,11 +180,9 @@ function drawBricks(){
             const bx = c*(brickWidth+brickPadding)+brickOffsetLeft;
             const by = r*(brickHeight+brickPadding)+brickOffsetTop;
 
-            // 塗りつぶし
             ctx.fillStyle = coldplayColors[r%coldplayColors.length];
             roundRect(ctx,bx,by,brickWidth,brickHeight,6,true);
 
-            // 枠線
             ctx.strokeStyle="rgba(0,0,0,0.2)";
             ctx.strokeRect(bx,by,brickWidth,brickHeight);
         }
@@ -199,8 +192,11 @@ function drawBricks(){
 function drawBall(){
     ctx.beginPath();
     ctx.arc(x,y,ballRadius,0,Math.PI*2);
-    ctx.fillStyle="#00ECFF";
+    ctx.fillStyle="#FFFF00";
     ctx.fill();
+    ctx.strokeStyle="#FF8800";
+    ctx.lineWidth = 2;
+    ctx.stroke();
     ctx.closePath();
 }
 
@@ -238,7 +234,6 @@ function roundRect(ctx,x,y,w,h,r,fill){
     if(fill) ctx.fill();
 }
 
-// === 衝突 ===
 function checkCollisionsAndProgress(){
     if(x+dx>W-ballRadius||x+dx<ballRadius){ dx=-dx; if(soundHit) try{soundHit.play()}catch{} }
     if(y+dy<ballRadius){ dy=-dy; if(soundHit) try{soundHit.play()}catch{} }
@@ -253,13 +248,11 @@ function checkCollisionsAndProgress(){
             dy = -Math.abs(speed*Math.cos(angle));
             if(soundHit) try{ soundHit.play() }catch{};
         } else if(y+dy>H+10){
-            if(soundOver) try{ soundOver.play() }catch{};
             setTimeout(resetForRetry,200);
         }
     }
 }
 
-// === レベルアップ ===
 function checkLevelClear(){
     let allGone=true;
     for(let c=0;c<brickColumnCount;c++){
@@ -279,8 +272,24 @@ function checkLevelClear(){
     }
 }
 
-// === リセット ===
 function resetForRetry(){
+    lives--;
+    updateLives();
+    
+    if(lives <= 0){
+        lives = 3;
+        level = 1;
+        score = 0;
+        combo = 0;
+        dx = 3;
+        dy = -3;
+        brickRowCount = 6;
+        initBricks();
+        updateLives();
+        updateHUD();
+        gameStarted = false;
+    }
+    
     x=W/2; y=H-60;
     dx=3*Math.sign(dx||1); dy=-3;
     paddleWidth=100;
@@ -289,7 +298,6 @@ function resetForRetry(){
     updateHUD();
 }
 
-// === 入力 ===
 document.addEventListener("keydown",(e)=>{
     const k=e.key.toLowerCase();
     if(k==="arrowright"||k==="d") rightPressed=true;
@@ -301,33 +309,41 @@ document.addEventListener("keyup",(e)=>{
     if(k==="arrowleft"||k==="a") leftPressed=false;
 });
 
-// === マウス/タッチ ===
-function handlePointerMove(xPos){
-    paddleX = clamp(xPos-paddleWidth/2,0,W-paddleWidth);
-    useMouse = true;
+function getCanvasX(clientX){
+    const rect = canvas.getBoundingClientRect();
+    const relX = clientX - rect.left;
+    return (relX / rect.width) * W;
 }
-canvas.addEventListener("mousemove", e => {
-    const rect = canvas.getBoundingClientRect();
-    handlePointerMove(e.clientX-rect.left);
-});
-canvas.addEventListener("touchmove", e=>{
-    e.preventDefault();
-    const rect = canvas.getBoundingClientRect();
-    handlePointerMove(e.touches[0].clientX-rect.left);
-},{passive:false});
 
-// === リサイズ ===
+document.addEventListener("mousemove", e => {
+    mouseX = getCanvasX(e.clientX);
+});
+
+document.addEventListener("touchmove", e => {
+    e.preventDefault();
+    if(e.touches.length > 0){
+        mouseX = getCanvasX(e.touches[0].clientX);
+    }
+}, { passive: false });
+
+document.addEventListener("touchstart", e => {
+    e.preventDefault();
+    if(e.touches.length > 0){
+        mouseX = getCanvasX(e.touches[0].clientX);
+    }
+}, { passive: false });
+
 function resizeCanvas(){
     const prevW=W, prevH=H;
-    W=window.innerWidth;
-    H=window.innerHeight*0.6;
+    W = Math.min(window.innerWidth, MAX_WIDTH);
+    H = W * ASPECT_RATIO;
     canvas.width=W; canvas.height=H;
     const wRatio = W/prevW, hRatio=H/prevH;
     paddleX*=wRatio; x*=wRatio; y*=hRatio;
+    initBricks();
 }
 window.addEventListener("resize", resizeCanvas);
 
-// === ゲーム開始 ===
 document.addEventListener("click",()=>{
     if(!gameStarted){
         gameStarted=true;
@@ -337,7 +353,6 @@ document.addEventListener("click",()=>{
     }
 });
 
-// === メインループ ===
 function loop(){
     if(!gameStarted){
         ctx.fillStyle="#0a1620";
@@ -349,14 +364,17 @@ function loop(){
         return requestAnimationFrame(loop);
     }
 
-    ctx.clearRect(0,0,W,H);
+    ctx.fillStyle="#0a1620";
+    ctx.fillRect(0,0,W,H);
     drawBricks(); drawItems(); drawParticles(); drawBall(); drawPaddle();
     updateItems(); updateParticles(); collisionDetection();
     checkCollisionsAndProgress(); checkLevelClear();
 
-    if(!useMouse){
-        if(rightPressed) paddleX=clamp(paddleX+6,0,W-paddleWidth);
-        if(leftPressed) paddleX=clamp(paddleX-6,0,W-paddleWidth);
+    if(mouseX !== null){
+        paddleX = clamp(mouseX - paddleWidth/2, 0, W - paddleWidth);
+    } else {
+        if(rightPressed) paddleX=clamp(paddleX+8,0,W-paddleWidth);
+        if(leftPressed) paddleX=clamp(paddleX-8,0,W-paddleWidth);
     }
 
     x+=dx; y+=dy;
@@ -364,5 +382,4 @@ function loop(){
     requestAnimationFrame(loop);
 }
 
-// === 開始 ===
 requestAnimationFrame(loop);
