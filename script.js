@@ -379,15 +379,15 @@ document.addEventListener("keyup", (e)=>{
 
 // 共通のパドル位置計算ロジック
 function handlePointerMove(clientX){
-    const rect = canvas.getBoundingClientRect();
-    const xPos = clientX - rect.left;
-    // パドルをポインターの中心に移動し、キャンバス内にクランプ
-    paddleX = clamp(xPos - paddleWidth/2, 0, W - paddleWidth);
+    const rect = canvas.getBoundingClientRect();
+    const xPos = clientX - rect.left;
+    // パドルをポインターの中心に移動し、キャンバス内にクランプ
+    paddleX = clamp(xPos - paddleWidth/2, 0, W - paddleWidth);
 }
 
 // マウスでの操作
 canvas.addEventListener("mousemove", (e)=>{
-    handlePointerMove(e.clientX);
+    handlePointerMove(e.clientX);
 });
 
 // スマホ対応: タッチでの操作
@@ -463,4 +463,50 @@ function startGame(){
 }
 
 /// ===== ゲーム開始 =====
-startGame();
+startGame();　
+    return;
+    }
+
+    // === ここから通常のゲーム描画 ===
+    ctx.clearRect(0,0,W,H);
+
+    // 背景
+    ctx.fillStyle = "#0a1620";
+    ctx.fillRect(0,0,W,H);
+
+    // ブロック
+    drawBricks();
+
+    // ボール
+    drawBall();
+
+    // パドル
+    drawPaddle();
+
+    // アイテム
+    updateItems();
+    drawItems();
+
+    // パーティクル
+    updateParticles();
+    drawParticles();
+
+    // 衝突チェック
+    collisionDetection();
+    checkCollisionsAndProgress();
+    checkCollisionsAndProgress();
+
+    // ボール移動
+    x += dx;
+    y += dy;
+
+    // キーボード操作
+    if (rightPressed) paddleX = clamp(paddleX + 6, 0, W - paddleWidth);
+    if (leftPressed)  paddleX = clamp(paddleX - 6, 0, W - paddleWidth);
+
+    requestAnimationFrame(loop);
+}
+
+// 実行開始
+updateHUD();
+loop();

@@ -6,22 +6,35 @@
     <link rel="stylesheet" href="style.css" />
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
 </head>
+
 <body onload="document.getElementById('gameCanvas').focus()">
-    <div id="paddleArea"></div>
+
+    <!-- ゲームを完全中央に配置 -->
     <div class="container">
+
+        <!-- キャンバス本体 -->
         <canvas id="gameCanvas" width="640" height="480" tabindex="0"></canvas>
+
+        <!-- ライフ表示 -->
         <div id="lives"></div>
+
+        <!-- UI -->
         <div id="ui">
             <p id="startText"></p>
             <div id="hud">
                 <div id="score" class="hud">Score: 0</div>
                 <div id="level" class="hud">Level: 1</div>
                 <div id="combo" class="hud">Combo: 0</div>
-                
             </div>
         </div>
+
     </div>
 
+    <!-- ★ これがスマホ操作エリア（ここでOK） -->
+    <div id="paddleArea"></div>
+
+    <!-- ★ script.js は1回だけでOK -->
     <script src="script.js"></script>
+
 </body>
 </html>
