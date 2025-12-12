@@ -45,6 +45,11 @@ try {
     soundHit = new Audio("https://assets.mixkit.co/active_storage/sfx/2073/2073.wav");
 } catch(e){}
 
+// スタート画面用の変数
+let startTextOffset = -800;
+let subTextOffset = -1000;
+let sparkles = [];
+
 function clamp(v,a,b){ return Math.max(a, Math.min(b,v)); }
 function rand(min,max){ return Math.random()*(max-min)+min; }
 
@@ -265,7 +270,6 @@ function checkLevelClear(){
         level++;
         dx*=1.08; dy*=1.08;
         
-        // レベルアップ時もスマホとPCで調整
         const maxRows = window.innerWidth <= 600 ? 4 : 6;
         brickRowCount = Math.min(maxRows, brickRowCount+1);
         initBricks();
@@ -346,7 +350,6 @@ function resizeCanvas(){
     const wRatio = W/prevW, hRatio=H/prevH;
     paddleX*=wRatio; x*=wRatio; y*=hRatio;
     
-    // スマホとPCでブロック数を調整
     brickRowCount = window.innerWidth <= 600 ? 3 : 6;
     brickColumnCount = window.innerWidth <= 600 ? 4 : 8;
     brickOffsetTop = window.innerWidth <= 600 ? 80 : 60;
@@ -368,14 +371,120 @@ canvas.addEventListener("touchstart", (e) => {
     startGame();
 }, { passive: true });
 
+// キラキラパーティクル生成
+function createSparkles() {
+    if(Math.random() < 0.3) {
+        sparkles.push({
+            x: Math.random() * W,
+            y: Math.random() * H,
+            size: Math.random() * 4 + 2,
+            alpha: 1,
+            speed: Math.random() * 0.02 + 0.01
+        });
+    }
+    
+    for(let i = sparkles.length - 1; i >= 0; i--) {
+        sparkles[i].alpha -= sparkles[i].speed;
+        if(sparkles[i].alpha <= 0) {
+            sparkles.splice(i, 1);
+        }
+    }
+}
+
 function loop(){
     if(!gameStarted){
         ctx.fillStyle="#0a1620";
         ctx.fillRect(0,0,W,H);
-        ctx.fillStyle="#dff3ff";
-        ctx.font="22px sans-serif";
-        ctx.textAlign="center";
-        ctx.fillText("▶ クリック / タップでゲーム開始", W/2, H/2);
+        
+        // キラキラパーティクル生成と描画
+        createSparkles();
+        for(const sparkle of sparkles) {
+            ctx.save();
+            ctx.fillStyle = `rgba(0, 255, 255, ${sparkle.alpha})`;
+            ctx.shadowBlur = 15;
+            ctx.shadowColor = "#00ffff";
+            ctx.fillRect(sparkle.x, sparkle.y, sparkle.size, sparkle.size);
+            
+            // 十字の光
+            ctx.fillRect(sparkle.x - sparkle.size, sparkle.y + sparkle.size/2, sparkle.size * 3, 1);
+            ctx.fillRect(sparkle.x + sparkle.size/2, sparkle.y - sparkle.size, 1, sparkle.size * 3);
+            ctx.restore();
+        }
+        
+        // メインテキスト1行目「Breakout-Deluxe」
+        startTextOffset += 3;
+        if(startTextOffset > W + 800) startTextOffset = -800;
+        
+        const mainText1 = "Breakout-Deluxe";
+        const mainText2 = "GAME START";
+        ctx.font = "bold 48px 'Press Start 2P', monospace";
+        ctx.textAlign = "center";
+        
+        const pulse = 0.8 + Math.sin(Date.now() / 200) * 0.2;
+        
+        // 1行目の描画
+        ctx.shadowBlur = 40;
+        ctx.shadowColor = "#00ffff";
+        ctx.fillStyle = `rgba(0, 255, 255, ${pulse * 0.3})`;
+        ctx.fillText(mainText1, startTextOffset, H/2 - 50);
+        
+        ctx.shadowBlur = 25;
+        ctx.fillStyle = `rgba(100, 255, 255, ${pulse * 0.6})`;
+        ctx.fillText(mainText1, startTextOffset, H/2 - 50);
+        
+        ctx.shadowBlur = 15;
+        ctx.fillStyle = `rgba(150, 255, 255, ${pulse})`;
+        ctx.fillText(mainText1, startTextOffset, H/2 - 50);
+        
+        ctx.shadowBlur = 0;
+        ctx.strokeStyle = `rgba(255, 255, 255, ${pulse * 0.8})`;
+        ctx.lineWidth = 3;
+        ctx.strokeText(mainText1, startTextOffset, H/2 - 50);
+        
+        // 2行目の描画
+        ctx.font = "bold 40px 'Press Start 2P', monospace";
+        
+        ctx.shadowBlur = 40;
+        ctx.shadowColor = "#00ffff";
+        ctx.fillStyle = `rgba(0, 255, 255, ${pulse * 0.3})`;
+        ctx.fillText(mainText2, startTextOffset, H/2 + 10);
+        
+        ctx.shadowBlur = 25;
+        ctx.fillStyle = `rgba(100, 255, 255, ${pulse * 0.6})`;
+        ctx.fillText(mainText2, startTextOffset, H/2 + 10);
+        
+        ctx.shadowBlur = 15;
+        ctx.fillStyle = `rgba(150, 255, 255, ${pulse})`;
+        ctx.fillText(mainText2, startTextOffset, H/2 + 10);
+        
+        ctx.shadowBlur = 0;
+        ctx.strokeStyle = `rgba(255, 255, 255, ${pulse * 0.8})`;
+        ctx.lineWidth = 3;
+        ctx.strokeText(mainText2, startTextOffset, H/2 + 10);
+        
+        // サブテキスト「クリックでゲーム開始」
+        subTextOffset += 2;
+        if(subTextOffset > W + 1000) subTextOffset = -1000;
+        
+        const subText = "クリックでゲーム開始";
+        ctx.font = "bold 20px 'Press Start 2P', monospace";
+        
+        const subPulse = 0.7 + Math.sin(Date.now() / 300) * 0.3;
+        
+        ctx.shadowBlur = 30;
+        ctx.shadowColor = "#00ffff";
+        ctx.fillStyle = `rgba(0, 255, 255, ${subPulse * 0.4})`;
+        ctx.fillText(subText, subTextOffset, H/2 + 80);
+        
+        ctx.shadowBlur = 12;
+        ctx.fillStyle = `rgba(120, 255, 255, ${subPulse})`;
+        ctx.fillText(subText, subTextOffset, H/2 + 80);
+        
+        ctx.shadowBlur = 0;
+        ctx.strokeStyle = `rgba(255, 255, 255, ${subPulse * 0.6})`;
+        ctx.lineWidth = 2;
+        ctx.strokeText(subText, subTextOffset, H/2 + 80);
+        
         return requestAnimationFrame(loop);
     }
 
