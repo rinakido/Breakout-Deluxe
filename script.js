@@ -466,25 +466,32 @@ function loop(){
         subTextOffset += 2;
         if(subTextOffset > W + 1000) subTextOffset = -1000;
         
-        const subText = "クリックでゲーム開始";
-        ctx.font = "bold 20px 'Press Start 2P', monospace";
-        
-        const subPulse = 0.7 + Math.sin(Date.now() / 300) * 0.3;
-        
-        ctx.shadowBlur = 30;
-        ctx.shadowColor = "#00ffff";
-        ctx.fillStyle = `rgba(0, 255, 255, ${subPulse * 0.4})`;
-        ctx.fillText(subText, subTextOffset, H/2 + 80);
-        
-        ctx.shadowBlur = 12;
-        ctx.fillStyle = `rgba(120, 255, 255, ${subPulse})`;
-        ctx.fillText(subText, subTextOffset, H/2 + 80);
-        
-        ctx.shadowBlur = 0;
-        ctx.strokeStyle = `rgba(255, 255, 255, ${subPulse * 0.6})`;
-        ctx.lineWidth = 2;
-        ctx.strokeText(subText, subTextOffset, H/2 + 80);
-        
+        // --- 中略（1〜2行目はそのまま） ---
+
+// ★★★ サブテキスト（固定 ＋ 点滅） ★★★
+const subText = "▶ クリック / タップでブロック崩しゲーム開始";
+
+// ここ！固定表示にするので offset を使わない
+ctx.font = "bold 20px 'Press Start 2P', monospace";
+
+const subPulse = 0.7 + Math.sin(Date.now() / 300) * 0.3;
+
+// 発光（点滅）
+ctx.shadowBlur = 30;
+ctx.shadowColor = "#00ffff";
+ctx.fillStyle = `rgba(0, 255, 255, ${subPulse * 0.4})`;
+ctx.fillText(subText, W/2, H/2 + 80);
+
+ctx.shadowBlur = 12;
+ctx.fillStyle = `rgba(120, 255, 255, ${subPulse})`;
+ctx.fillText(subText, W/2, H/2 + 80);
+
+// 白いストローク
+ctx.shadowBlur = 0;
+ctx.strokeStyle = `rgba(255, 255, 255, ${subPulse * 0.6})`;
+ctx.lineWidth = 2;
+ctx.strokeText(subText, W/2, H/2 + 80);
+
         return requestAnimationFrame(loop);
     }
 
