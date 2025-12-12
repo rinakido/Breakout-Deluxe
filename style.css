@@ -42,6 +42,7 @@ canvas{
   max-width:800px;
   width:100%;
   touch-action: none;
+  cursor: pointer;
 }
 
 #ui{

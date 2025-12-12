@@ -344,14 +344,19 @@ function resizeCanvas(){
 }
 window.addEventListener("resize", resizeCanvas);
 
-document.addEventListener("click",()=>{
+function startGame(){
     if(!gameStarted){
         gameStarted=true;
         const st = document.getElementById("startText");
         if(st) st.style.display="none";
         canvas.focus();
     }
-});
+}
+
+document.addEventListener("click", startGame);
+canvas.addEventListener("touchstart", (e) => {
+    startGame();
+}, { passive: true });
 
 function loop(){
     if(!gameStarted){
