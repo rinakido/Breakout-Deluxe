@@ -2,8 +2,8 @@ const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 
 const MAX_WIDTH = 800;
-const ASPECT_RATIO = 0.75;
-let W = Math.min(window.innerWidth, MAX_WIDTH);
+const ASPECT_RATIO = window.innerWidth <= 600 ? 1.4 : 0.75;
+let W = Math.min(window.innerWidth * 0.95, MAX_WIDTH);
 let H = W * ASPECT_RATIO;
 canvas.width = W;
 canvas.height = H;
@@ -28,12 +28,12 @@ let rightPressed = false;
 let leftPressed = false;
 let mouseX = null;
 
-let brickRowCount = 6;
-let brickColumnCount = 8;
+let brickRowCount = window.innerWidth <= 600 ? 3 : 6;
+let brickColumnCount = window.innerWidth <= 600 ? 4 : 8;
 let brickWidth = 60;
 let brickHeight = 16;
 let brickPadding = 8;
-let brickOffsetTop = 60;
+let brickOffsetTop = window.innerWidth <= 600 ? 80 : 60;
 let brickOffsetLeft = 30;
 let bricks = [];
 
@@ -264,7 +264,10 @@ function checkLevelClear(){
     if(allGone){
         level++;
         dx*=1.08; dy*=1.08;
-        brickRowCount = Math.min(6, brickRowCount+1);
+        
+        // レベルアップ時もスマホとPCで調整
+        const maxRows = window.innerWidth <= 600 ? 4 : 6;
+        brickRowCount = Math.min(maxRows, brickRowCount+1);
         initBricks();
         x=W/2; y=H-60;
         paddleX=(W-paddleWidth)/2;
@@ -283,7 +286,8 @@ function resetForRetry(){
         combo = 0;
         dx = 3;
         dy = -3;
-        brickRowCount = 6;
+        brickRowCount = window.innerWidth <= 600 ? 3 : 6;
+        brickColumnCount = window.innerWidth <= 600 ? 4 : 8;
         initBricks();
         updateLives();
         updateHUD();
@@ -335,11 +339,17 @@ document.addEventListener("touchstart", e => {
 
 function resizeCanvas(){
     const prevW=W, prevH=H;
-    W = Math.min(window.innerWidth, MAX_WIDTH);
-    H = W * ASPECT_RATIO;
+    W = Math.min(window.innerWidth * 0.95, MAX_WIDTH);
+    const aspectRatio = window.innerWidth <= 600 ? 1.4 : 0.75;
+    H = W * aspectRatio;
     canvas.width=W; canvas.height=H;
     const wRatio = W/prevW, hRatio=H/prevH;
     paddleX*=wRatio; x*=wRatio; y*=hRatio;
+    
+    // スマホとPCでブロック数を調整
+    brickRowCount = window.innerWidth <= 600 ? 3 : 6;
+    brickColumnCount = window.innerWidth <= 600 ? 4 : 8;
+    brickOffsetTop = window.innerWidth <= 600 ? 80 : 60;
     initBricks();
 }
 window.addEventListener("resize", resizeCanvas);

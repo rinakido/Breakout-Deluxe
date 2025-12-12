@@ -45,6 +45,15 @@ canvas{
   cursor: pointer;
 }
 
+@media (max-width: 600px) {
+  canvas {
+    width: 95vw;
+    max-width: 95vw;
+    border-radius: 4px;
+    border-width: 2px;
+  }
+}
+
 #ui{
   position:absolute;
   top:20px;
