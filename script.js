@@ -2,7 +2,7 @@ const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 
 const MAX_WIDTH = 800;
-const ASPECT_RATIO = window.innerWidth <= 600 ? 1.4 : 0.75;
+const ASPECT_RATIO = window.innerWidth <= 600 ? 1.6 : 0.75 // モバイルで縦長画面を確保するため1.6に変更;
 let W = Math.min(window.innerWidth * 0.95, MAX_WIDTH);
 let H = W * ASPECT_RATIO;
 canvas.width = W;
@@ -28,8 +28,8 @@ let rightPressed = false;
 let leftPressed = false;
 let mouseX = null;
 
-let brickRowCount = window.innerWidth <= 600 ? 3 : 6;
-let brickColumnCount = window.innerWidth <= 600 ? 4 : 8;
+let brickRowCount = 6; // モバイルでもPCと同じ6行に固定
+let brickColumnCount = 8; // モバイルでもPCと同じ8列に固定
 let brickWidth = 60;
 let brickHeight = 16;
 let brickPadding = 8;
@@ -270,7 +270,7 @@ function checkLevelClear(){
         level++;
         dx*=1.08; dy*=1.08;
         
-        const maxRows = window.innerWidth <= 600 ? 4 : 6;
+        const maxRows = 6; // モバイルでも最大行数を6に固定
         brickRowCount = Math.min(maxRows, brickRowCount+1);
         initBricks();
         x=W/2; y=H-60;
@@ -290,8 +290,8 @@ function resetForRetry(){
         combo = 0;
         dx = 3;
         dy = -3;
-        brickRowCount = window.innerWidth <= 600 ? 3 : 6;
-        brickColumnCount = window.innerWidth <= 600 ? 4 : 8;
+        brickRowCount = 6;
+        brickColumnCount = 8;
         initBricks();
         updateLives();
         updateHUD();
@@ -344,14 +344,14 @@ document.addEventListener("touchstart", e => {
 function resizeCanvas(){
     const prevW=W, prevH=H;
     W = Math.min(window.innerWidth * 0.95, MAX_WIDTH);
-    const aspectRatio = window.innerWidth <= 600 ? 1.4 : 0.75;
+    const aspectRatio = window.innerWidth <= 600 ? 1.6 : 0.75 // モバイルで縦長画面を確保するため1.6に変更;
     H = W * aspectRatio;
     canvas.width=W; canvas.height=H;
     const wRatio = W/prevW, hRatio=H/prevH;
     paddleX*=wRatio; x*=wRatio; y*=hRatio;
     
-    brickRowCount = window.innerWidth <= 600 ? 3 : 6;
-    brickColumnCount = window.innerWidth <= 600 ? 4 : 8;
+    brickRowCount = 6;
+    brickColumnCount = 8;
     brickOffsetTop = window.innerWidth <= 600 ? 80 : 60;
     initBricks();
 }
