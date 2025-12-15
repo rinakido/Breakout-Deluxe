@@ -30,7 +30,7 @@ html,body{
   display:flex;
   flex-direction:column;
   align-items:center;
-  justify-content:center;
+  justify-content:flex-start;
 }
 
 canvas{
@@ -43,15 +43,6 @@ canvas{
   width:100%;
   touch-action: none;
   cursor: pointer;
-}
-
-@media (max-width: 600px) {
-  canvas {
-    width: 95vw;
-    max-width: 95vw;
-    border-radius: 4px;
-    border-width: 2px;
-  }
 }
 
 #ui{
@@ -93,15 +84,18 @@ canvas{
   gap: 24px;
   margin-top: 15px;
   z-index: 10;
-  position: relative;
+  position: absolute;
+  bottom: 80px;
+  left: 50%;
+  transform: translateX(-50%);
 }
 
 .heart {
-  width: 24px;
-  height: 24px;
+  width: 16px;
+  height: 16px;
   position: relative;
   transform: rotate(-45deg);
-  background: #FF6B9D;
+  background: #00ecff;
   display: inline-block;
 }
 
@@ -109,14 +103,14 @@ canvas{
 .heart::after {
   content: "";
   position: absolute;
-  width: 24px;
-  height: 24px;
-  background: #FF6B9D;
+  width: 16px;
+  height: 16px;
+  background: #00ecff;
   border-radius: 50%;
 }
 
-.heart::before { top: -12px; left: 0; }
-.heart::after  { left: 12px; top: 0; }
+.heart::before { top: -8px; left: 0; }
+.heart::after  { left: 8px; top: 0; }
 
 @keyframes pop {
   0% { transform: scale(1) rotate(-45deg); opacity:1; }
@@ -132,8 +126,36 @@ canvas{
   body {
     font-size: 4vw;
   }
+  
+  canvas {
+    border-radius: 0;
+    border: none;
+    box-shadow: none;
+    height: 100vh;
+    max-height: 100vh;
+  }
+  
   #hud {
     font-size: 12px;
     gap: 8px;
   }
+  
+  #lives {
+    gap: 10px;
+    bottom: 60px;
+  }
+  
+  .heart {
+    width: 12px;
+    height: 12px;
+  }
+  
+  .heart::before,
+  .heart::after {
+    width: 12px;
+    height: 12px;
+  }
+  
+  .heart::before { top: -6px; left: 0; }
+  .heart::after  { left: 6px; top: 0; }
 }
