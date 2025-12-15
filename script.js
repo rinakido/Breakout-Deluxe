@@ -2,9 +2,18 @@ const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 
 const MAX_WIDTH = 800;
-const ASPECT_RATIO = window.innerWidth <= 600 ? 1.6 : 0.75 // モバイルで縦長画面を確保するため1.6に変更;
-let W = Math.min(window.innerWidth * 0.95, MAX_WIDTH);
-let H = W * ASPECT_RATIO;
+// スマホは画面の90%を使う（下部に余裕を持たせる）
+const isMobile = window.innerWidth <= 600;
+let W, H;
+
+if(isMobile){
+    W = window.innerWidth;
+    H = window.innerHeight * 0.92; // 下部8%を余白に
+} else {
+    W = Math.min(window.innerWidth * 0.95, MAX_WIDTH);
+    H = W * 0.75;
+}
+
 canvas.width = W;
 canvas.height = H;
 
@@ -22,18 +31,19 @@ const ballRadius = 8;
 let paddleWidth = 100;
 const paddleHeight = 12;
 let paddleX = (W - paddleWidth)/2;
-const PADDLE_Y_PAD = 20;
+const PADDLE_Y_PAD = window.innerWidth <= 600 ? 40 : 20; // スマホは下から40px
 
 let rightPressed = false;
 let leftPressed = false;
 let mouseX = null;
 
-let brickRowCount = 6; // モバイルでもPCと同じ6行に固定
-let brickColumnCount = 8; // モバイルでもPCと同じ8列に固定
+// スマホでもブロック数を維持（少し調整）
+let brickRowCount = window.innerWidth <= 600 ? 5 : 6;
+let brickColumnCount = window.innerWidth <= 600 ? 6 : 8;
 let brickWidth = 60;
 let brickHeight = 16;
 let brickPadding = 8;
-let brickOffsetTop = window.innerWidth <= 600 ? 80 : 60;
+let brickOffsetTop = window.innerWidth <= 600 ? 100 : 60;
 let brickOffsetLeft = 30;
 let bricks = [];
 
@@ -186,10 +196,7 @@ function drawBricks(){
             const by = r*(brickHeight+brickPadding)+brickOffsetTop;
 
             ctx.fillStyle = coldplayColors[r%coldplayColors.length];
-            roundRect(ctx,bx,by,brickWidth,brickHeight,6,true);
-
-            ctx.strokeStyle="rgba(0,0,0,0.2)";
-            ctx.strokeRect(bx,by,brickWidth,brickHeight);
+            roundRect(ctx,bx,by,brickWidth,brickHeight,4,true);
         }
     }
 }
@@ -270,7 +277,7 @@ function checkLevelClear(){
         level++;
         dx*=1.08; dy*=1.08;
         
-        const maxRows = 6; // モバイルでも最大行数を6に固定
+        const maxRows = window.innerWidth <= 600 ? 5 : 6;
         brickRowCount = Math.min(maxRows, brickRowCount+1);
         initBricks();
         x=W/2; y=H-60;
@@ -290,8 +297,8 @@ function resetForRetry(){
         combo = 0;
         dx = 3;
         dy = -3;
-        brickRowCount = 6;
-        brickColumnCount = 8;
+        brickRowCount = window.innerWidth <= 600 ? 5 : 6;
+        brickColumnCount = window.innerWidth <= 600 ? 6 : 8;
         initBricks();
         updateLives();
         updateHUD();
@@ -343,16 +350,23 @@ document.addEventListener("touchstart", e => {
 
 function resizeCanvas(){
     const prevW=W, prevH=H;
-    W = Math.min(window.innerWidth * 0.95, MAX_WIDTH);
-    const aspectRatio = window.innerWidth <= 600 ? 1.6 : 0.75 // モバイルで縦長画面を確保するため1.6に変更;
-    H = W * aspectRatio;
+    const isMobile = window.innerWidth <= 600;
+    
+    if(isMobile){
+        W = window.innerWidth;
+        H = window.innerHeight * 0.92;
+    } else {
+        W = Math.min(window.innerWidth * 0.95, MAX_WIDTH);
+        H = W * 0.75;
+    }
+    
     canvas.width=W; canvas.height=H;
     const wRatio = W/prevW, hRatio=H/prevH;
     paddleX*=wRatio; x*=wRatio; y*=hRatio;
     
-    brickRowCount = 6;
-    brickColumnCount = 8;
-    brickOffsetTop = window.innerWidth <= 600 ? 80 : 60;
+    brickRowCount = window.innerWidth <= 600 ? 5 : 6;
+    brickColumnCount = window.innerWidth <= 600 ? 6 : 8;
+    brickOffsetTop = window.innerWidth <= 600 ? 100 : 60;
     initBricks();
 }
 window.addEventListener("resize", resizeCanvas);
@@ -412,86 +426,76 @@ function loop(){
         }
         
         // メインテキスト1行目「Breakout-Deluxe」
-        startTextOffset += 3;
+        startTextOffset += 3.5;
         if(startTextOffset > W + 800) startTextOffset = -800;
         
         const mainText1 = "Breakout-Deluxe";
         const mainText2 = "GAME START";
-        ctx.font = "bold 48px 'Press Start 2P', monospace";
+        
+        // スマホ用のフォントサイズ調整
+        const fontSize1 = window.innerWidth <= 600 ? 28 : 48;
+        const fontSize2 = window.innerWidth <= 600 ? 24 : 40;
+        const subFontSize = window.innerWidth <= 600 ? 12 : 20;
+        
+        ctx.font = `bold ${fontSize1}px 'Press Start 2P', monospace`;
         ctx.textAlign = "center";
         
         const pulse = 0.8 + Math.sin(Date.now() / 200) * 0.2;
         
-        // 1行目の描画
-        ctx.shadowBlur = 40;
-        ctx.shadowColor = "#00ffff";
-        ctx.fillStyle = `rgba(0, 255, 255, ${pulse * 0.3})`;
-        ctx.fillText(mainText1, startTextOffset, H/2 - 50);
+        // 1行目の描画（ピクセル風に2重で描画 + 白い縁取り）
+        ctx.shadowBlur = 0;
+        ctx.fillStyle = "#003344";
+        ctx.fillText(mainText1, startTextOffset + 2, H/2 - 38);
         
-        ctx.shadowBlur = 25;
-        ctx.fillStyle = `rgba(100, 255, 255, ${pulse * 0.6})`;
-        ctx.fillText(mainText1, startTextOffset, H/2 - 50);
+        // 白い光る縁取り
+        ctx.strokeStyle = "rgba(255, 255, 255, 0.8)";
+        ctx.lineWidth = 2;
+        ctx.strokeText(mainText1, startTextOffset, H/2 - 40);
         
         ctx.shadowBlur = 15;
-        ctx.fillStyle = `rgba(150, 255, 255, ${pulse})`;
-        ctx.fillText(mainText1, startTextOffset, H/2 - 50);
+        ctx.shadowColor = "#00ecff";
+        ctx.fillStyle = `rgba(0, 236, 255, ${pulse})`;
+        ctx.fillText(mainText1, startTextOffset, H/2 - 40);
+        
+        // 2行目の描画（白い縁取り追加）
+        ctx.font = `bold ${fontSize2}px 'Press Start 2P', monospace`;
         
         ctx.shadowBlur = 0;
-        ctx.strokeStyle = `rgba(255, 255, 255, ${pulse * 0.8})`;
-        ctx.lineWidth = 3;
-        ctx.strokeText(mainText1, startTextOffset, H/2 - 50);
+        ctx.fillStyle = "#003344";
+        ctx.fillText(mainText2, startTextOffset + 2, H/2 + 12);
         
-        // 2行目の描画
-        ctx.font = "bold 40px 'Press Start 2P', monospace";
-        
-        ctx.shadowBlur = 40;
-        ctx.shadowColor = "#00ffff";
-        ctx.fillStyle = `rgba(0, 255, 255, ${pulse * 0.3})`;
-        ctx.fillText(mainText2, startTextOffset, H/2 + 10);
-        
-        ctx.shadowBlur = 25;
-        ctx.fillStyle = `rgba(100, 255, 255, ${pulse * 0.6})`;
-        ctx.fillText(mainText2, startTextOffset, H/2 + 10);
-        
-        ctx.shadowBlur = 15;
-        ctx.fillStyle = `rgba(150, 255, 255, ${pulse})`;
-        ctx.fillText(mainText2, startTextOffset, H/2 + 10);
-        
-        ctx.shadowBlur = 0;
-        ctx.strokeStyle = `rgba(255, 255, 255, ${pulse * 0.8})`;
-        ctx.lineWidth = 3;
+        // 白い光る縁取り
+        ctx.strokeStyle = "rgba(255, 255, 255, 0.8)";
+        ctx.lineWidth = 2;
         ctx.strokeText(mainText2, startTextOffset, H/2 + 10);
         
-        // サブテキスト「クリックでゲーム開始」
-        subTextOffset += 2;
-        if(subTextOffset > W + 1000) subTextOffset = -1000;
+        ctx.shadowBlur = 15;
+        ctx.shadowColor = "#00ecff";
+        ctx.fillStyle = `rgba(0, 236, 255, ${pulse})`;
+        ctx.fillText(mainText2, startTextOffset, H/2 + 10);
         
-        // --- 中略（1〜2行目はそのまま） ---
-
-// ★★★ サブテキスト（固定 ＋ 点滅） ★★★
-const subText = "▶ クリック / タップでブロック崩しゲーム開始";
-
-// ここ！固定表示にするので offset を使わない
-ctx.font = "bold 20px 'Press Start 2P', monospace";
-
-const subPulse = 0.7 + Math.sin(Date.now() / 300) * 0.3;
-
-// 発光（点滅）
-ctx.shadowBlur = 30;
-ctx.shadowColor = "#00ffff";
-ctx.fillStyle = `rgba(0, 255, 255, ${subPulse * 0.4})`;
-ctx.fillText(subText, W/2, H/2 + 80);
-
-ctx.shadowBlur = 12;
-ctx.fillStyle = `rgba(120, 255, 255, ${subPulse})`;
-ctx.fillText(subText, W/2, H/2 + 80);
-
-// 白いストローク
-ctx.shadowBlur = 0;
-ctx.strokeStyle = `rgba(255, 255, 255, ${subPulse * 0.6})`;
-ctx.lineWidth = 2;
-ctx.strokeText(subText, W/2, H/2 + 80);
-
+        // サブテキスト（固定 + 点滅）
+        const subText = "▶ クリック / タップでブロック崩しゲーム開始";
+        ctx.font = `bold ${subFontSize}px 'Press Start 2P', monospace`;
+        
+        const subPulse = 0.7 + Math.sin(Date.now() / 300) * 0.3;
+        
+        // 発光（点滅）
+        ctx.shadowBlur = 30;
+        ctx.shadowColor = "#00ffff";
+        ctx.fillStyle = `rgba(0, 255, 255, ${subPulse * 0.4})`;
+        ctx.fillText(subText, W/2, H/2 + 80);
+        
+        ctx.shadowBlur = 12;
+        ctx.fillStyle = `rgba(120, 255, 255, ${subPulse})`;
+        ctx.fillText(subText, W/2, H/2 + 80);
+        
+        // 白いストローク
+        ctx.shadowBlur = 0;
+        ctx.strokeStyle = `rgba(255, 255, 255, ${subPulse * 0.6})`;
+        ctx.lineWidth = 2;
+        ctx.strokeText(subText, W/2, H/2 + 80);
+        
         return requestAnimationFrame(loop);
     }
 
