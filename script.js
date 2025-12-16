@@ -251,17 +251,24 @@ function checkCollisionsAndProgress(){
     if(y+dy<ballRadius){ dy=-dy; if(soundHit) try{soundHit.play()}catch{} }
 
     const paddleTop = H-PADDLE_Y_PAD-paddleHeight;
-    if(y+dy>paddleTop-ballRadius){
-        if(x>paddleX && x<paddleX+paddleWidth){
+    const paddleBottom = H-PADDLE_Y_PAD;
+    
+    // パドルに当たる判定（ボールが上から来て、パドルの範囲内にある時のみ）
+    if(dy > 0 && y < paddleTop && y+dy >= paddleTop-ballRadius && y+dy <= paddleBottom){
+        // X座標がパドル範囲内かチェック
+        if(x >= paddleX && x <= paddleX+paddleWidth){
             const hitPoint = (x-(paddleX+paddleWidth/2))/(paddleWidth/2);
             const speed = Math.hypot(dx,dy);
             const angle = hitPoint*(Math.PI/3);
             dx = speed*Math.sin(angle);
             dy = -Math.abs(speed*Math.cos(angle));
             if(soundHit) try{ soundHit.play() }catch{};
-        } else if(y+dy>H+10){
-            setTimeout(resetForRetry,200);
         }
+    }
+    
+    // 画面下に完全に落ちた判定
+    if(y > H){
+        setTimeout(resetForRetry,200);
     }
 }
 
