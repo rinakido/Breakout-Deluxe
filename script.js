@@ -56,7 +56,7 @@ try {
 } catch(e){}
 
 // スタート画面用の変数
-let startTextOffset = -800;
+let startTextOffset = W/2; // 板付き！最初から画面中央に
 let subTextOffset = -1000;
 let sparkles = [];
 
@@ -426,7 +426,7 @@ function loop(){
         }
         
         // メインテキスト1行目「Breakout-Deluxe」
-        startTextOffset += 3.5;
+        startTextOffset += 4.5; // スピードアップ（3.5 → 4.5）
         if(startTextOffset > W + 800) startTextOffset = -800;
         
         const mainText1 = "Breakout-Deluxe";
@@ -442,34 +442,34 @@ function loop(){
         
         const pulse = 0.8 + Math.sin(Date.now() / 200) * 0.2;
         
-        // 1行目の描画（ピクセル風に2重で描画 + 白い縁取り）
+        // 1行目の描画（ピクセル風に2重で描画 + 白い縁取り強化）
         ctx.shadowBlur = 0;
         ctx.fillStyle = "#003344";
         ctx.fillText(mainText1, startTextOffset + 2, H/2 - 38);
         
-        // 白い光る縁取り
-        ctx.strokeStyle = "rgba(255, 255, 255, 0.8)";
-        ctx.lineWidth = 2;
+        // 白い光る縁取り（太く！）
+        ctx.strokeStyle = "rgba(255, 255, 255, 0.9)";
+        ctx.lineWidth = 4; // 2 → 4に増加
         ctx.strokeText(mainText1, startTextOffset, H/2 - 40);
         
-        ctx.shadowBlur = 15;
+        ctx.shadowBlur = 20; // 15 → 20に増加
         ctx.shadowColor = "#00ecff";
         ctx.fillStyle = `rgba(0, 236, 255, ${pulse})`;
         ctx.fillText(mainText1, startTextOffset, H/2 - 40);
         
-        // 2行目の描画（白い縁取り追加）
+        // 2行目の描画（白い縁取り強化）
         ctx.font = `bold ${fontSize2}px 'Press Start 2P', monospace`;
         
         ctx.shadowBlur = 0;
         ctx.fillStyle = "#003344";
         ctx.fillText(mainText2, startTextOffset + 2, H/2 + 12);
         
-        // 白い光る縁取り
-        ctx.strokeStyle = "rgba(255, 255, 255, 0.8)";
-        ctx.lineWidth = 2;
+        // 白い光る縁取り（太く！）
+        ctx.strokeStyle = "rgba(255, 255, 255, 0.9)";
+        ctx.lineWidth = 4; // 2 → 4に増加
         ctx.strokeText(mainText2, startTextOffset, H/2 + 10);
         
-        ctx.shadowBlur = 15;
+        ctx.shadowBlur = 20; // 15 → 20に増加
         ctx.shadowColor = "#00ecff";
         ctx.fillStyle = `rgba(0, 236, 255, ${pulse})`;
         ctx.fillText(mainText2, startTextOffset, H/2 + 10);
